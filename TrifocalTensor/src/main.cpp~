@@ -1,0 +1,208 @@
+#include <iostream>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <cstring>
+
+#include "../include/Tensor.hpp"
+#include "../include/MathIO.hpp"
+#include "../include/draw.hpp"
+
+Eigen::Vector3d equations(Eigen::MatrixXd list1, Eigen::MatrixXd list2, Eigen::MatrixXd list3){
+
+Eigen::Vector3d point1;
+Eigen::Vector3d point2;
+Eigen::Vector3d point3;
+Eigen::MatrixXd A; //A initialiser à zéro
+Tensor::Tensor T;
+
+int cpt = 0;
+
+	for(int i = 1; i<=2; ++i){
+		for(int l=1; l<=2 ; ++l){
+			for(int p=1; p<=7; ++p){
+					point1(list1(p,0), list1(p,1), list1(p,2));
+					point2(list2(p,0), list2(p,1), list2(p,2));
+					point3(list3(p,0), list3(p,1), list3(p,2));
+
+					for(int k = 1; k <=3; ++k){
+						A[cpt] = point1[k]*(point2[i]*point3[3]*T[3,l] - point2[3]*point3[3]*T[i,l] - point2[i]*point3[l]*T[3,3] + point2[3]*point3[l]*T[i,3]);						
+
+					}
+					cpt ++;
+			}
+		}
+	}
+
+	return A;
+
+}
+
+
+int main(int argc, char *argv[]){
+
+		//displays the options passed through the console
+		int i;
+		for (i=0; i < argc; ++i){
+
+			//if no arguments passed
+			if(argc < 2){
+				std::cout << "-----------------------------------------------------------------------------" << std::endl;
+				std::cout << "		TRIFOCAL TENSOR 																						" 
+									<< " 		Please specify the names of image files or check the help (-h)	" << std::endl;
+				std::cout	<< "-----------------------------------------------------------------------------" << std::endl;
+				return 0;
+			}
+
+
+			//if help needed
+			if(strcmp( argv[i], "-h") == 0 || strcmp( argv[i], "-help") == 0 ){
+				//in the console : groff -Tascii -man help.1 | less
+
+			}
+		
+
+			//check image files
+			int image_count = 0;
+			for(i=1; i < 4 ; ++i){
+				if(argv[i]!=NULL){
+					std::string file = argv[i];
+					if(file.substr(file.find_last_of(".") + 1) == "jpg") {
+							image_count ++;
+					} 
+					else{
+						std::cout << "-----------------------------------------------------------------------------" << std::endl;
+						std::cout << "		TRIFOCAL TENSOR 														" 
+											<< " 		You specified a non valid format of image files.						"
+											<< " 		Please try again or check the help (-h)											" << std::endl;
+						std::cout	<< "-----------------------------------------------------------------------------" << std::endl;
+					}
+				}
+				else{//Check if too few or too many image files passed
+					std::cout << "-----------------------------------------------------------------------------" << std::endl;
+					std::cout << "		TRIFOCAL TENSOR 														" 
+										<< " 		You specified too few or too many image files : 3 needed.						"
+										<< " 		Please try again or check the help (-h)											" << std::endl;
+					std::cout	<< "-----------------------------------------------------------------------------" << std::endl;
+				}
+			}
+		
+
+			//check list files
+			int list_count = 0;
+			for(i=4; i < argc ; ++i){
+				std::string file = argv[i];
+				if(file.substr(file.find_last_of(".") + 1) == "list"){
+						list_count ++;
+				}
+			}
+			if(list_count > 3){//Check if too many list files passed
+				std::cout << "-----------------------------------------------------------------------------" << std::endl;
+				std::cout << "		TRIFOCAL TENSOR 														" 
+									<< " 		You specified too many list files : 3 maximum.						"
+									<< " 		Please try again or check the help (-h)											" << std::endl;
+				std::cout	<< "-----------------------------------------------------------------------------" << std::endl;
+			}
+
+
+			std::cout << "Image Files : "<< image_count << " List Files : " << list_count  << std::endl;
+
+
+
+			//start the application
+			if(image_count == 3){
+
+				// init SDL image
+				if(IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG) == -1){
+					std::cerr << "error IMG_Init" << std::endl;
+					return EXIT_FAILURE;
+				}
+
+				// load some images
+				SDL_Surface *image1 = IMG_Load(argv[1]);
+				SDL_Surface *image2 = IMG_Load(argv[2]);
+				SDL_Surface *image3 = IMG_Load(argv[3]);
+				if(image1 == 0 || image2 == 0 || image3 == 0){
+				  std::cerr << "error loading images" << std::endl;
+				  return 0;
+				}
+
+				// init screen surface
+				if(SDL_Init(SDL_INIT_VIDEO) == -1){
+					std::cerr << "error SDL_Init" << std::endl;
+					return EXIT_FAILURE;
+				}
+
+				// create a screen surface that will include the 3 images
+				SDL_Surface *screen = SDL_SetVideoMode(image1->w + image2->w + image3->w, image1->h, 32, SDL_HWSURFACE);
+				SDL_WM_SetCaption("Trifocal Tensor", NULL);
+
+				// bibd the images on the surface  
+				SDL_Rect imageOffset;
+				imageOffset.x = 0;
+				imageOffset.y = 0;
+				SDL_BlitSurface(image1, NULL, screen, &imageOffset);
+				imageOffset.x = image1->w;
+				SDL_BlitSurface(image2, NULL, screen, &imageOffset);
+				imageOffset.x = image1->w + image2->w;
+				SDL_BlitSurface(image3, NULL, screen, &imageOffset);
+
+				// load the point lists
+				if(list_count > 0){
+					Eigen::MatrixXd list1;
+  				Eigen::MatrixXd list2;
+					Eigen::MatrixXd list3;
+					kn::loadMatrix(list1,"input/list1.list");
+					kn::loadMatrix(list2,"input/list2.list");
+					kn::loadMatrix(list3,"input/list3.list");
+
+					// some colors
+					Uint32 red  = 0xffff0000;
+					Uint32 blue = 0xff0000ff;
+					Uint32 yellow = 0xffffff00;
+
+					// draw points on image1
+					for(int i=0; i<list1.rows(); ++i)
+						fill_circle(screen, list1(i,0), list1(i,1), 3, red);
+
+					// draw points on image2
+					for(int i=0; i<list2.rows(); ++i)
+						fill_circle(screen, list2(i,0)+image1->w, list2(i,1), 3, blue);
+
+					// draw points on image3
+					for(int i=0; i<list3.rows(); ++i)
+						fill_circle(screen, list3(i,0)+image1->w+image2->w, list3(i,1), 3, yellow);
+
+				}
+
+
+				
+
+
+				// display everything
+				SDL_Flip(screen);
+
+				int loop = 1;
+				while(loop){
+
+					SDL_Event e;
+					while(SDL_PollEvent(&e)) {
+						if(e.type == SDL_QUIT) {
+							loop = 0;
+							break;
+						}
+					}
+				}
+	
+				// quit sdl
+				SDL_FreeSurface(image1); 
+  			SDL_FreeSurface(image2); 
+ 				SDL_FreeSurface(image3); 
+				IMG_Quit();
+				SDL_Quit();
+
+				return EXIT_SUCCESS;
+			}
+	}
+		return 0;
+	}
+

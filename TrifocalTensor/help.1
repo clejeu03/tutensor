@@ -1,0 +1,61 @@
+'\" t
+.\"     Title: Trifocal Tensor' Manual
+.\"    Author: Xochitl Florimont & Cécilia Lejeune
+.\"      Date: 01/12/2012
+.\"    Manual: Trifocal Tensor
+.\"  Language: English
+.\"
+.TH "HELP" "1" "01/12/2012" "Trifocal Tensor' Manual" "Trifocal Tensor' Manual"
+.\" http://bugs.debian.org/507673
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" http://bugs.debian.org/507673
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "ABOUT"
+Trifocal Tensor \-  A multimedia engineering students' project based on projective geometric in computer vision \&.
+
+.SH "SYNOPSIS"
+	./bin/trifocal [IMG FILE]... [LIST FILE]...
+
+.SH "DESCRIPTION"
+Given three views, this application allows the user to determine the location of a point in one of the views after giving the matching points in the two other views. The conditions required are three views and at least 7 matching points in these three views.
+.TP
+Tree pictures are needed, and you can eventually add your own lists of points. The order of your pictures is important, the processing will be launch on the third one. The order of your lists is important too, please respect the order you have made for the image files.
+	
+.TP
+.B\ -h or --help : 
+display a short help text.
+
+.TP
+.B\ [IMG FILE] [IMG FILE] [IMG FILE]
+the application will only display your pictures so you can do manually the selection of related points and launch the processing ; the processing will be launch on the third one.
+
+.TP
+.B\ [IMG FILE] [IMG FILE] [IMG FILE]  [LIST FILE] [LIST FILE]
+if you have already two lists of points and want to calcul the last one; work with 1 list too ; please note that you can add as many points as you want from the first two pictures.
+
+.TP
+.B\ [IMG FILE] [IMG FILE] [IMG FILE]  [LIST FILE] [LIST FILE] [LIST FILE]
+the application only display the final vision of all corresponding points in the three pictures.
+
+.SH "To quit press Q"
